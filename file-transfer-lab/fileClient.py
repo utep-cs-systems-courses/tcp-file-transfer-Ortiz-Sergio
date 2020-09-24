@@ -2,6 +2,8 @@
 
 # Echo client program
 import socket, sys, re
+import os.path
+from os import path
 
 sys.path.append("../lib")       # for params
 import params
@@ -45,6 +47,9 @@ if s is None:
 s.connect(addrPort)
 
 user_file = input("What file would you like to send? ")
+while not path.exists(user_file):
+    user_file = input("File does not exist, please try again ")
+
 f = open(user_file, "r")
 for line in f:
     print("sending "+line)
@@ -52,11 +57,4 @@ for line in f:
     print("received:", framedReceive(s, debug))
 
 f.close()
-#print("sending hello world")
-#framedSend(s, b"hello world", debug)
-#print("received:", framedReceive(s, debug))
-#
-#print("sending hello world")
-#framedSend(s, b"hello world", debug)
-#print("received:", framedReceive(s, debug))
 

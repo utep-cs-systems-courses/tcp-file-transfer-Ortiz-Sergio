@@ -30,6 +30,7 @@ print("connection rec'd from", addr)
 
 
 from framedSock import framedSend, framedReceive
+f = open("output.txt", "w")
 
 while True:
     payload = framedReceive(sock, debug)
@@ -37,4 +38,7 @@ while True:
     if not payload:
         break
     payload += b"!"             # make emphatic!
+    f.write(payload.decode("utf-8"))
     framedSend(sock, payload, debug)
+
+f.close()
