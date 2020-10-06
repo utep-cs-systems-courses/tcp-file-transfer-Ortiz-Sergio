@@ -1,12 +1,11 @@
 #! /usr/bin/env python3
 
 # Echo client program
-import socket, sys, re
-import os.path
-from os import path
+import socket, sys, re, os
 
 sys.path.append("../lib")       # for params
 import params
+from os.path import exists
 
 from framedSock import framedSend, framedReceive
 
@@ -46,15 +45,49 @@ if s is None:
 
 s.connect(addrPort)
 
-user_file = input("What file would you like to send? ")
-while not path.exists(user_file):
-    user_file = input("File does not exist, please try again ")
+print("Welcome to the file transfer program!")
+print("Enter the file to send, or -1 to exit")
+user_file = input("$ ")
 
-f = open(user_file, "r")
-for line in f:
-    print("sending "+line)
-    framedSend(s, str.encode(line), debug)
-    print("received:", framedReceive(s, debug))
+while True:
+    if user_file == "-1":
+        print("Thank you for using my program!")
+        sys.exit(0)
 
-f.close()
+    while not (exists(user_file)):
+        print("File does not exist, try again")
+        user_file = input("$ ")
+        continue
 
+    file_copy = open(user_file, 'rb')
+    file_data = file_copy.read()
+    if len(file_data) == 0:
+        print("Cannot send empty file, try again")
+        user_file = input("$ ")
+        continue
+    else:
+        print("What do you want to name the output file?")
+        new_file = input("$ ")
+        framedSend(s, new_file.encode(), debug)
+        file_exists = framedReceive(s, debug)
+        file_exists = file_exists.decode()
+        if file_exists == 'True':
+            print("File already exists in the server, try again")
+            user_file = input("$ ")
+            continue
+        else:
+            try:
+                framedSend(s, file_data, debug)
+            except:
+                print("connection lost while sending, exiting")
+                sys.exit(0)
+            try:
+                framedReceive(s, debug)
+            except:
+                print("connection lost while receiving, exiting")
+                sys.exit(0)
+
+    print("Enter the file to send, or -1 to exit")
+    user_file =  input("$ ")
+    
+      

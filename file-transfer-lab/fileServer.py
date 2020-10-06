@@ -1,8 +1,9 @@
 #! /usr/bin/env python3
 
-import sys
+import sys, os
 sys.path.append("../lib")       # for params
 import re, socket, params
+from os.path import exists
 
 switchesVarDefaults = (
     (('-l', '--listenPort') ,'listenPort', 50001),
@@ -24,21 +25,34 @@ lsock.bind(bindAddr)
 lsock.listen(5)
 print("listening on:", bindAddr)
 
-sock, addr = lsock.accept()
-
-print("connection rec'd from", addr)
-
-
 from framedSock import framedSend, framedReceive
-f = open("output.txt", "w")
 
 while True:
-    payload = framedReceive(sock, debug)
-    if debug: print("rec'd: ", payload)
-    if not payload:
-        break
-    payload += b"!"             # make emphatic!
-    f.write(payload.decode("utf-8"))
-    framedSend(sock, payload, debug)
+    sock, addr = lsock.accept()
+    print("connection rc'd from", addr)
+    if not os.fork():
+        while True:
+            payload = framedReceive(sock, debug)
+            if not payload:
+                break
+            payload = payload.decode()
 
-f.close()
+            if exists(payload):
+                framedSend(sock, b"True", debug)
+            else:
+                framedSend(sock, b"False", debug)
+                try:
+                    payload2 = framedReceive(sock, debug)
+                except:
+                    print("connection lost while receiving, exiting")
+                    sys.exit(0)
+                if not payload2:
+                    break
+                payload2 += b"!"
+                try:
+                    framedSend(sock, payload2, debug)
+                except:
+                    print("connection lost while sending, exiting")
+                output = open(payload, 'wb')
+                output.write(payload2)
+                sock.close()
