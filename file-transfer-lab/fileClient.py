@@ -54,7 +54,7 @@ while True:
         print("Thank you for using my program!")
         sys.exit(0)
 
-    while not (exists(user_file)):
+    if not (exists(user_file)):
         print("File does not exist, try again")
         user_file = input("$ ")
         continue
