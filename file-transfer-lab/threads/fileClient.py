@@ -3,7 +3,7 @@
 # Echo client program
 import socket, sys, re, os
 
-sys.path.append("../lib")       # for params
+sys.path.append("../../lib")       # for params
 import params
 from os.path import exists
 

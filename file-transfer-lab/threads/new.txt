@@ -1,0 +1,6 @@
+hello
+ok
+why
+no
+yes
+maybe
